@@ -53,13 +53,15 @@ function show(){
   window.scrollTo(0,0);
 }
 function done(){
-  var y=a.n*12,lost=y*(1-a.r/10),dort=lost*a.p,gain=dort*0.1;
+  var y=a.n*12,lost=Math.round(y*(1-a.r/10)),back=Math.max(1,Math.round(lost*0.1)),gain=back*a.p,need=Math.max(1,Math.ceil(228/a.p));
+  a.gain=gain;a.back=back;a.lost=lost;
   try{localStorage.setItem("fidele_reponses",JSON.stringify(a))}catch(e){}
   app.innerHTML='<h1>Voici ce que vous venez de décrire.</h1>'
-  +'<div class="res"><small>Clients qui ne reviennent pas, par an</small><b>'+Math.round(lost)+'</b><small>sur '+y+' clients servis</small></div>'
-  +'<div class="res"><small>Chiffre qui dort chaque année</small><b>'+eur(dort)+'</b><small>'+Math.round(lost)+' clients × '+a.p+' € en moyenne</small></div>'
-  +'<p>Si seulement 1 de ces clients sur 10 revenait grâce à un rappel, ce serait <strong>'+eur(gain)+'</strong> de plus par an. Fidèle coûte 228 € par an (19 € par mois).</p>'
-  +'<p class="note">Estimation à partir de vos réponses et d\'une hypothèse prudente de 10 %. Ce n\'est pas une promesse de résultat.</p>'
+  +'<div class="res"><small>Clients qui ne reviennent pas, par an</small><b>'+lost+'</b><small>sur '+y+' clients servis</small></div>'
+  +'<div class="res"><small>Avec un rappel, vous pourriez en récupérer</small><b>'+back+'</b><small>hypothèse prudente : 1 client perdu sur 10</small></div>'
+  +'<div class="res"><small>Ce que ça rapporterait chaque année</small><b>'+eur(gain)+'</b><small>'+back+' client'+(back>1?'s':'')+' × '+a.p+' € en moyenne</small></div>'
+  +'<p>Fidèle coûte 228 € par an (19 € par mois). <strong>'+need+' client'+(need>1?'s':'')+' revenu'+(need>1?'s':'')+'</strong> suffi'+(need>1?'sent':'t')+' à couvrir l\'année.</p>'
+  +'<p class="note">Estimation à partir de vos réponses. Ce n\'est pas une promesse de résultat.</p>'
   +'<button class="btn" id="go">Voir mon premier rappel</button>';
   window.scrollTo(0,0);
 }
