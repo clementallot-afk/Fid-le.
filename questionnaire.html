@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Votre diagnostic · Fidèle</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--vert:#1d2b24;--terre:#c8502d;--creme:#f6f1e7;--trait:#d9d0bd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--creme);color:var(--vert);font:18px/1.5 system-ui,sans-serif;min-height:100vh}
+.w{max-width:560px;margin:0 auto;padding:0 22px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;padding-top:20px;font-family:Georgia,serif;font-weight:700;font-size:1.3rem}
+.top a{font:400 .9rem system-ui;color:var(--vert)}
+.bar{height:6px;background:var(--trait);margin:20px 0 32px}
+.bar i{display:block;height:100%;width:0;background:var(--terre);transition:width .3s}
+h1{font-family:Georgia,serif;font-size:1.9rem;line-height:1.15;margin:0 0 24px}
+.n{opacity:.7;font-size:.9rem;margin:0 0 8px}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--trait);color:var(--vert);font:inherit;font-weight:600;padding:16px 18px;margin-bottom:12px;min-height:58px;cursor:pointer}
+.opt:active{border-color:var(--terre)}
+.back{background:none;border:0;color:var(--vert);font:inherit;font-size:.95rem;text-decoration:underline;padding:12px 0;cursor:pointer}
+.res{background:var(--vert);color:var(--creme);padding:22px;margin-bottom:16px}
+.res b{display:block;font-family:Georgia,serif;font-size:2.1rem;color:#f2a58a;line-height:1.1;margin:6px 0 4px}
+.res small{display:block;opacity:.8}
+.btn{display:block;text-align:center;background:var(--terre);color:#fff;font-weight:700;font-size:1.15rem;padding:18px;min-height:56px;border:0;width:100%;font-family:inherit;cursor:pointer}
+.note{font-size:.85rem;opacity:.75}
+</style>
+</head>
+<body>
+<div class="w">
+<div class="top">Fidèle <a href="/">Quitter</a></div>
+<div class="bar"><i id="bar"></i></div>
+<div id="app"></div>
+</div>
+<script>
+var Q=[
+{t:"Combien de clients avez-vous servis le mois dernier ?",k:"n",o:[["Moins de 10",6],["10 à 25",18],["26 à 50",38],["Plus de 50",60]]},
+{t:"Quelle intervention vous demande-t-on le plus souvent ?",k:"type",o:[["Entretien de chaudière",1],["Dépannage",2],["Remplacement de chaudière ou d'installation",3],["Salle de bain, plomberie neuve",4]]},
+{t:"Quel est le montant moyen d'une intervention ?",k:"p",o:[["Moins de 100 €",75],["100 à 250 €",175],["250 à 500 €",375],["Plus de 500 €",700]]},
+{t:"Sur 10 clients satisfaits, combien reviennent dans l'année sans que vous les relanciez ?",k:"r",o:[["1 ou moins",1],["Environ 3",3],["Environ 5",5],["7 ou plus",7]]},
+{t:"Comment retrouvez-vous vos anciens clients aujourd'hui ?",k:"fichier",o:[["Un carnet ou un fichier à jour",1],["Dans ma tête et mon téléphone",2],["Je ne les retrouve pas vraiment",3]]},
+{t:"Quand avez-vous relancé un ancien client pour la dernière fois ?",k:"relance",o:[["Cette semaine",1],["Ce mois-ci",2],["Il y a plus de 3 mois",3],["Jamais",4]]}
+];
+var a={},i=0,app=document.getElementById("app"),bar=document.getElementById("bar");
+function eur(x){return (Math.round(x/10)*10).toLocaleString("fr-FR")+"\u00a0€"}
+function show(){
+  bar.style.width=(i/Q.length*100)+"%";
+  if(i>=Q.length){return done()}
+  var q=Q[i],h='<p class="n">Question '+(i+1)+' sur '+Q.length+'</p><h1>'+q.t+'</h1>';
+  q.o.forEach(function(o,j){h+='<button class="opt" data-j="'+j+'">'+o[0]+'</button>'});
+  if(i>0){h+='<button class="back" id="bk">← Question précédente</button>'}
+  app.innerHTML=h;
+  window.scrollTo(0,0);
+}
+function done(){
+  var y=a.n*12,lost=y*(1-a.r/10),dort=lost*a.p,gain=dort*0.1;
+  try{localStorage.setItem("fidele_reponses",JSON.stringify(a))}catch(e){}
+  app.innerHTML='<h1>Voici ce que vous venez de décrire.</h1>'
+  +'<div class="res"><small>Clients qui ne reviennent pas, par an</small><b>'+Math.round(lost)+'</b><small>sur '+y+' clients servis</small></div>'
+  +'<div class="res"><small>Chiffre qui dort chaque année</small><b>'+eur(dort)+'</b><small>'+Math.round(lost)+' clients × '+a.p+' € en moyenne</small></div>'
+  +'<p>Si seulement 1 de ces clients sur 10 revenait grâce à un rappel, ce serait <strong>'+eur(gain)+'</strong> de plus par an. Fidèle coûte 228 € par an (19 € par mois).</p>'
+  +'<p class="note">Estimation à partir de vos réponses et d\'une hypothèse prudente de 10 %. Ce n\'est pas une promesse de résultat.</p>'
+  +'<button class="btn" id="go">Voir mon premier rappel</button>';
+  window.scrollTo(0,0);
+}
+app.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.id==="bk"){i--;show();return}
+  if(b.id==="go"){b.outerHTML='<p><strong>Votre premier rappel arrive très bientôt.</strong></p>';return}
+  if(b.dataset.j===undefined)return;
+  var q=Q[i];a[q.k]=q.o[+b.dataset.j][1];i++;show();
+});
+show();
+</script>
+</body>
+</html>
